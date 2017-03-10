@@ -46,11 +46,11 @@ public:
 	double zd = 1;
 
         mavros_msgs::PositionTarget ctrl_msg;
-	mavros_msgs::AttitudeTarget angular_msg;
+	//mavros_msgs::AttitudeTarget angular_msg;
         //geometry_msgs::TwistStamped angular_msg;
 	ros::Time time;
 
-        //mavros_msgs::CommandLong cmd_msg;
+        mavros_msgs::CommandLong cmd_msg;
 
 	uav() {index = 0;};
 	uav(int i) {index = i;};
@@ -75,25 +75,25 @@ public:
 		//ctrl_msg.yaw_rate = yaw_rate;
 
 // /mavros/cmd/command
-/*
+
                 dt = ros::Time::now()-time;
                 cmd_msg.request.command = 115;
-                cmd_msg.request.param1 += yaw_rate*.05;
+                cmd_msg.request.param1 += yaw_rate*.dt;
                 time = ros::Time::now();
-*/
+
 
 // /mavros/setpoint_position/local
                 //angular_msg.twist.angular.z = yaw_rate;
 
 // /mavros/setpoint_raw/attitude
-
+/*
                 //angular_msg.type_mask = 0b11111011; //dont know what this does yet
                 angular_msg.type_mask = mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE | 
                                         mavros_msgs::AttitudeTarget::IGNORE_PITCH_RATE |
                                         mavros_msgs::AttitudeTarget::IGNORE_ATTITUDE;
                 angular_msg.body_rate.z = yaw_rate;
                 angular_msg.thrust = 1;
-
+*/
 	}
 
 	void ctrlCallback (const geometry_msgs::TwistStamped & msg)
