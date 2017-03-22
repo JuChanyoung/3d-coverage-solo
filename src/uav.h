@@ -31,6 +31,8 @@
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/CommandCode.h>
 
+constant float PI = 3.14159265;
+
 class uav
 {
 public:
@@ -40,8 +42,9 @@ public:
 	ax,ay,az,
 	qx,qy,qz,qw,
 	wx,wy,wz,
-	yaw;
-	ros::Duration dt;
+	yaw,
+	dt;
+	ros::Duration dT;
 	mavros_msgs::State current_state;
 	double zd = 1;
 
@@ -59,16 +62,16 @@ public:
 	void ctrl(int i, const double & u, const double & v, const double & w, const double & yaw_rate)
 	{
                 ctrl_msg.header.stamp = ros::Time::now();
-                ctrl_msg.coordinate_frame = mavros_msgs::PositionTarget::FRAME_BODY_NED;
+                ctrl_msg.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
                 ctrl_msg.type_mask = mavros_msgs::PositionTarget::IGNORE_PX |
                                      mavros_msgs::PositionTarget::IGNORE_PY |
                                      mavros_msgs::PositionTarget::IGNORE_PZ |
                                      mavros_msgs::PositionTarget::IGNORE_AFX |
                                      mavros_msgs::PositionTarget::IGNORE_AFY |
-                                     mavros_msgs::PositionTarget::IGNORE_AFZ |
-                                     mavros_msgs::PositionTarget::FORCE |
-                                     mavros_msgs::PositionTarget::IGNORE_YAW |
-                                     mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+                                     mavros_msgs::PositionTarget::IGNORE_AFZ;
+                                     //mavros_msgs::PositionTarget::FORCE |
+                                     //mavros_msgs::PositionTarget::IGNORE_YAW |
+                                     //mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
 		ctrl_msg.velocity.x = u;
 		ctrl_msg.velocity.y = v;
 		ctrl_msg.velocity.z = w;
@@ -76,9 +79,13 @@ public:
 
 // /mavros/cmd/command
 
-                dt = ros::Time::now()-time;
+                dT = ros::Time::now()-time;
+								dt = dT.toSec()
                 cmd_msg.request.command = 115;
                 cmd_msg.request.param1 += yaw_rate*.dt;
+								cmd_msg.request.param2 = PI;
+								cmd_msg.request.param3 = -1;
+								cmd_msg.request.param4 = 0;
                 time = ros::Time::now();
 
 
@@ -88,7 +95,7 @@ public:
 // /mavros/setpoint_raw/attitude
 /*
                 //angular_msg.type_mask = 0b11111011; //dont know what this does yet
-                angular_msg.type_mask = mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE | 
+                angular_msg.type_mask = mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE |
                                         mavros_msgs::AttitudeTarget::IGNORE_PITCH_RATE |
                                         mavros_msgs::AttitudeTarget::IGNORE_ATTITUDE;
                 angular_msg.body_rate.z = yaw_rate;
