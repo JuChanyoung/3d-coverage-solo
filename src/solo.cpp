@@ -27,6 +27,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/PositionTarget.h>
+#include <mavros_msgs/GlobalPositionTarget.h>
 #include <mavros_msgs/CommandLong.h>
 
 #include "uav.h"
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
   {
     cov_ctrl_sub[i] = nh.subscribe(cov_ctrl(i), 1, &uav::ctrlCallback, &cluster[i]); // Uncomment to integrate with MATLAB
     state_sub[i] = nh.subscribe(state(i), 1, &uav::stateCallback, &cluster[i]);
-    command_pub[i] = nh.advertise<mavros_msgs::PositionTarget>(ctrlpub(i), 10);
+    command_pub[i] = nh.advertise<mavros_msgs::GlobalPositionTarget>(ctrlpub(i), 10);
     //angular_pub[i] = nh.advertise<mavros_msgs::AttitudeTarget>(angularpub(i), 10);
     //angular_pub[i] = nh.advertise<geometry_msgs::TwistStamped>(angularpub(i), 1);
     arming_client[i] = nh.serviceClient<mavros_msgs::CommandBool>(arming(i));
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
     yaw_ctrl_client[i] = nh.serviceClient<mavros_msgs::CommandLong>(command_long(i));
   }
 
-  ros::Rate loop_rate(40);
+  ros::Rate loop_rate(60);
 
   // Declare mode and arm_cmd variables
   mavros_msgs::SetMode guided_set_mode;
@@ -82,6 +83,9 @@ int main(int argc, char **argv)
   ros::Time last_request[] = {ros::Time::now(),ros::Time::now()};
 
   spinner.start();
+  ros::Time current_time = ros::Time::now();
+  ros::Duration dt;
+  float time_elapsed;
 
   while (ros::ok())
   {
@@ -105,12 +109,19 @@ int main(int argc, char **argv)
           }
         }
       }
-      
+
+      // Check time elapsed to slow update frequency
+      dt = ros::Time::now() - current_time;
+      time_elapsed = dt.toSec();
+
       // Publish control cmd from MATLAB
       for(int i=0;i<n;i++)
       {
         //cluster[i].ctrl(i,0,0,1,0); // Testing cmd publishers
-        command_pub[i].publish(cluster[i].ctrl_msg);
+        if (time_elapsed == 3) {
+          command_pub[i].publish(cluster[i].ctrl_msg);
+          current_time = ros::Time::now();
+        }
         //angular_pub[i].publish(cluster[i].angular_msg);
         yaw_ctrl_client[i].call(cluster[i].cmd_msg);
       }
