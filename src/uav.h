@@ -78,12 +78,13 @@ public:
 		//ctrl_msg.yaw_rate = yaw_rate;
 
 // /mavros/cmd/command
+// NOTE: yaw angle in degrees
 
                 dT = ros::Time::now()-time;
 								dt = dT.toSec()
                 cmd_msg.request.command = 115;
-                cmd_msg.request.param1 += yaw_rate*.dt;
-								cmd_msg.request.param2 = PI;
+                cmd_msg.request.param1 += yaw_rate*180/PI*.dt;
+								cmd_msg.request.param2 = yaw_rate;
 								cmd_msg.request.param3 = -1;
 								cmd_msg.request.param4 = 0;
                 time = ros::Time::now();
