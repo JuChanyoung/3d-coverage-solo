@@ -1,0 +1,10 @@
+This is the LeddarTM SDK for Linux.
+Documentation in HTML format can be found in the 'doc' directory.
+Start with index.html for the main page.
+
+LeddarTM SDK folders:
+    Includes: Includes files you need to use LeddarTM SDK
+    Examples: Examples connecting to sensors using USB and MODBUS
+    Examples/LeddarCDemo: Example using LeddarTM SDK
+    Release: Pre-compiled LeddarTM SDK libraries
+    
