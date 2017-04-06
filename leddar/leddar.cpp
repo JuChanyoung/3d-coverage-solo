@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
   if(!lcm.good())
   return 1;
 
-  while (1) {}
+  while (1) {
     // Acquire detections from Leddar.
     LeddarGetDetections(handler, detections, count);
 
@@ -68,5 +68,6 @@ int main(int argc, char ** argv)
     lcm.publish("Sensor", &msg);
   }
 
+  lcm_destroy(lcm);
   return 0;
 }
