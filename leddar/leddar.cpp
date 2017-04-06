@@ -2,6 +2,7 @@
 #include<iostream>
 #include<stdio>
 #include<string>
+#include <unistd.h>
 
 // Leddar API
 #include "include/LeddarC.h"
@@ -11,6 +12,7 @@
 
 // LCM libraries
 #include <lcm/lcm-cpp.hpp>
+#include <lcm/lcm.h>
 
 // Leddar specifications.
 #define BEAM_COUNT 16
@@ -50,7 +52,7 @@ int main(int argc, char ** argv)
   }
 
   // Initialize lcm handler
-  lcm::LCM lcm;
+  lcm::LCM lcm("udpm://239.255.255.255:7667?ttl=1");
   if(!lcm.good())
   return 1;
 
@@ -66,6 +68,7 @@ int main(int argc, char ** argv)
 
     // Publish data
     lcm.publish("Sensor", &msg);
+    usleep(1000);
   }
 
   lcm_destroy(lcm);
