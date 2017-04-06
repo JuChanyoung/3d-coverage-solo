@@ -1,0 +1,30 @@
+// Standard C++ libraries
+#include<iostream>
+#include<stdio>
+// Leddar API
+#include "include/LeddarC.h"
+#include "include/LeddarCommands.h"
+#include "include/LeddarProperties.h"
+// LCM libraries
+#include <lcm/lcm-cpp.hpp>
+
+
+int main(int argc, char ** argv)
+{
+  using namespace std;
+
+  LdDetection sensorData;
+  LeddarHandle sensorHandle = NULL;
+
+  lcm::LCM lcm;
+  if(!lcm.good())
+  return 1;
+
+  // 1. Open comm port on LeddarTech Sensor
+  while (1) {
+    // 2. Read sensor data into a package
+    // 3. Publish data
+  }
+
+  return 0;
+}
