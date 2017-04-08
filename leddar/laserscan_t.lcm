@@ -1,11 +1,6 @@
-//#include <stdio>
-#include <iostream>
-#include <vector>
+package Laser;
 
-namespace laser
-{
-  class LaserScan {
-  public:
+struct laserscan_t {
     /*
     float32_t time_stamp;
     float32_t angle_min;
@@ -16,7 +11,6 @@ namespace laser
     float32_t range_min;
     float32_t range_max;
     */
-    std::vector< float > ranges;
-    std::vector< float > intensities;
-  };
-}
+    float ranges[16];
+    float intensities[16];
+  }

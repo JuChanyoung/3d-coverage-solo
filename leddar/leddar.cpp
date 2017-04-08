@@ -1,14 +1,14 @@
 // Standard C++ libraries
-#include<iostream>
-#include<stdio>
-#include<string>
+#include <iostream>
+//#include <stdio>
+#include <string>
 #include <unistd.h>
 
 // Leddar API
 #include "include/LeddarC.h"
 #include "include/LeddarCommands.h"
 #include "include/LeddarProperties.h"
-#include "include/LaserScan.h"
+#include "include/laserscan_t.hpp"
 
 // LCM libraries
 #include <lcm/lcm-cpp.hpp>
@@ -28,21 +28,21 @@ static void connect(LeddarHandle handler, const char* serial) {
     }
 
     if (code == LD_SUCCESS) {
-        ROS_INFO("Connected to %s", serial);
+        //ROS_INFO("Connected to %s", serial);
     } else {
-        ROS_FATAL("Failed to connect to %s with code: %d", serial, code);
+        //ROS_FATAL("Failed to connect to %s with code: %d", serial, code);
     }
 }
 
 int main(int argc, char ** argv)
 {
   using namespace std;
-  using namespace laser;
+  using namespace Laser;
 
-  LaserScan msg;
+  laserscan_t msg;
 
   // Initialize and connect to sensor
-  handler = LeddarCreate();
+  LeddarHandle handler = LeddarCreate();
   char * serial = "/dev/ttyUSB0";
   connect(handler,serial);
   LdDetection detections[BEAM_COUNT];
@@ -62,8 +62,10 @@ int main(int argc, char ** argv)
 
     // Transfer detections into msg
     for (int i=0;i<count;i++){
-      msg.ranges.push_back(detections[i].mDistance);
-      msg.intensities.push_back(detections[i].mAmplitude);
+      // msg.ranges.push_back(detections[i].mDistance);
+      // msg.intensities.push_back(detections[i].mAmplitude);
+      msg.ranges[i] = detections[i].mDistance;
+      msg.intensities[i] = detections[i].mAmplitude;
     }
 
     // Publish data
@@ -71,6 +73,6 @@ int main(int argc, char ** argv)
     usleep(1000);
   }
 
-  lcm_destroy(lcm);
+  //lcm_destroy(lcm);
   return 0;
 }
