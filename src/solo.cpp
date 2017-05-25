@@ -15,6 +15,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/PolygonStamped.h>
 
 // Mavros msg
 #include <mavros/mavros.h>
@@ -32,6 +33,20 @@
 #include "uav.h"
 #include "msg_print.h"
 
+void set_safety_f(geometry_msgs::PolygonStamped &vol, int &i){
+
+  vol.header.stamp = ros::Time::now();
+  vol.header.frame_id = "MAV_FRAME_LOCAL_NED";
+  vol.polygon.points[0].x = -1; // quadrotor home pos (default = initial pos) = origin (meters)
+  vol.polygon.points[0].y = -1;
+  vol.polygon.points[0].z = 3;
+  vol.polygon.points[1].x = 1;
+  vol.polygon.points[1].y = 1;
+  vol.polygon.points[1].z = 3;
+
+  safety_area_pub[i].publish(vol);
+};
+
 int main(int argc, char **argv)
 {
   const int n=1; // N agents in the system
@@ -40,12 +55,15 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "GCS_Main");
   ros::NodeHandle nh;
   ros::Subscriber state_sub[n];
+  ros::Subscriber cov_ctrl_sub[n];
   ros::Publisher command_pub[n];
+  ros::Publisher safety_area_pub[n];
+
   //ros::Publisher angular_pub[n];
   ros::ServiceClient arming_client[n];
   ros::ServiceClient set_mode_client[n];
   ros::ServiceClient yaw_ctrl_client[n];
-  ros::Subscriber cov_ctrl_sub[n];
+  ros::ServiceClient set_home_client[n];
 
   ros::AsyncSpinner spinner(8);
 
@@ -63,11 +81,19 @@ int main(int argc, char **argv)
     cov_ctrl_sub[i] = nh.subscribe(cov_ctrl(i), 1, &uav::ctrlCallback, &cluster[i]); // Uncomment to integrate with MATLAB
     state_sub[i] = nh.subscribe(state(i), 1, &uav::stateCallback, &cluster[i]);
     command_pub[i] = nh.advertise<mavros_msgs::PositionTarget>(ctrlpub(i), 10);
+    safety_area_pub[i] = nh.advertise<geometry_msgs::PolygonStamped>(safety_area(i), 10);
     //angular_pub[i] = nh.advertise<mavros_msgs::AttitudeTarget>(angularpub(i), 10);
     //angular_pub[i] = nh.advertise<geometry_msgs::TwistStamped>(angularpub(i), 1);
     arming_client[i] = nh.serviceClient<mavros_msgs::CommandBool>(arming(i));
     set_mode_client[i] = nh.serviceClient<mavros_msgs::SetMode>(set_mode(i));
     yaw_ctrl_client[i] = nh.serviceClient<mavros_msgs::CommandLong>(command_long(i));
+    set_home_client[i] = nh.serviceClient<mavros_msgs::CommandHome>(set_home(i));
+  }
+
+  // Set safety area
+  geometry_msgs::PolygonStamped vol;
+  for (int i=0;i<n;i++) {
+    set_safety_f(vol,i);
   }
 
   ros::Rate loop_rate(40);
@@ -105,7 +131,7 @@ int main(int argc, char **argv)
           }
         }
       }
-      
+
       // Publish control cmd from MATLAB
       for(int i=0;i<n;i++)
       {

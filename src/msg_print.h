@@ -24,12 +24,21 @@ char * angularpub( int i)
 	{
                   //case 0: return "/mavros1/setpoint_velocity/cmd_vel";
                   //case 1: return "/mavros2/setpoint_velocity/cmd_vel";
-	          case 0: return "/mavros1/setpoint_raw/attitude";
-		  case 1: return "/mavros2/setpoint_raw/attitude";
+	    case 0: return "/mavros1/safety_area/set";
+		  case 1: return "/mavros2/safety_area/set";
 	}
 }
 
 char * cov_ctrl( int i)
+{
+	switch(i)
+	{
+		case 0: return "/cov_ctrl_1";
+		case 1: return "/cov_ctrl_2";
+	}
+}
+
+char * safety_area( int i)
 {
 	switch(i)
 	{
@@ -62,6 +71,15 @@ char * set_mode( int i)
 	{
 		case 0: return "/mavros1/set_mode";
 		case 1: return "/mavros2/set_mode";
+	}
+}
+
+char * set_home( int i)
+{
+	switch(i)
+	{
+		case 0: return "/mavros1/cmd/set_home";
+		case 1: return "/mavros2/cmd/set_home";
 	}
 }
 
